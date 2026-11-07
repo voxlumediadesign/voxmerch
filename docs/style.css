@@ -37,7 +37,7 @@ label{display:grid;gap:4px;font-weight:650} input,textarea,select{width:100%;min
   --line: #2e436e;
 }
 header { background: #0b142c; }
-.header > a { background: #fff; border-radius: 9px; padding: 5px 9px; }
+.header > a { display: inline-flex; align-items: center; }
 .header img { height: auto; }
 .card { background-color: #101e3c; }
 .calculator { background-color: #13264d; }
