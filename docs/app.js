@@ -18,6 +18,21 @@ const link = (url,label,style='') => `<a class="button ${style}" href="#${url}">
 let config;
 let adminKey = '';
 let revision = 0;
+let disposeHero;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+async function syncHeroMotion() {
+  disposeHero?.();
+  disposeHero = undefined;
+  const stage = main.querySelector('.hero-stage');
+  if (!stage || reducedMotion.matches) return;
+  try {
+    const { mountHeroMotion } = await import('./hero-motion.js');
+    if (stage.isConnected && !reducedMotion.matches && !disposeHero) disposeHero = mountHeroMotion(stage);
+  } catch {
+    // The static hero is available on devices without WebGL.
+  }
+}
 
 let api = serverApi;
 async function serverApi(path,method='GET',data,admin=false) {
@@ -105,6 +120,7 @@ function home() {
   calc.addEventListener('input',estimate);
   calc.addEventListener('submit',event => event.preventDefault());
   estimate();
+  syncHeroMotion();
 }
 function how() {
   main.innerHTML = intro('Print-on-demand','How Voxmerch works','See how a blank product becomes an order ready to ship.') + stepCards() + `<div class="section actions">${link('catalog','Choose a product')}${link('studio','Open dashboard','secondary')}</div>`;
@@ -327,6 +343,8 @@ async function render() {
     if (anchor.hash === '#' + page) anchor.setAttribute('aria-current','page');
     else anchor.removeAttribute('aria-current');
   }
+  disposeHero?.();
+  disposeHero = undefined;
   main.innerHTML = '<p role="status">Loading…</p>';
   try {
     config = await api('config');
@@ -367,6 +385,7 @@ async function render() {
 }
 export function start(adapter = serverApi) {
   api = adapter;
+  reducedMotion.addEventListener('change', syncHeroMotion);
   window.addEventListener('hashchange',() => { if (location.hash !== '#main') { render(); main.focus(); } });
   render();
 }

@@ -22,6 +22,10 @@ const assets = Object.fromEntries(Object.entries({
   '/':['index.html','text/html; charset=utf-8'], '/app.js':['app.js','text/javascript; charset=utf-8'],
   '/tote-showcase.png':['tote-showcase.png','image/png'],
   '/hero-model.png':['hero-model.png','image/png'],
+  '/hero-motion.js':['hero-motion.js','text/javascript; charset=utf-8'],
+  '/three.module.min.js':['three.module.min.js','text/javascript; charset=utf-8'],
+  '/three.core.min.js':['three.core.min.js','text/javascript; charset=utf-8'],
+  '/montserrat-latin-wght-normal.woff2':['montserrat-latin-wght-normal.woff2','font/woff2'],
   '/style.css':['style.css','text/css; charset=utf-8'], '/voxmerch.png':['voxmerch.png','image/png'],
 }).map(([url,[file,type]]) => [url,[readFileSync(new URL('./public/' + file, import.meta.url)),type]]));
 
