@@ -12,7 +12,7 @@ $env:VOX_ADMIN_KEY = 'voxmerch-demo-local-2026'
 npm start
 ```
 
-Buka http://127.0.0.1:3000. Masuk lewat **Studio kreator** atau buat akun. Pilih kaos atau tote, unggah PNG/JPG, simpan draf atau terbitkan, lalu buka tautan produk. Untuk pesanan sampel, gunakan tombol **Pesan sampel** di studio.
+Buka http://127.0.0.1:3000. Masuk lewat **Dashboard** atau buat akun. Cari kaos atau tote di katalog, buka spesifikasi produk, unggah PNG/JPG, simpan draf atau terbitkan, lalu buka tautan produk. Untuk pesanan sampel, gunakan tombol **Pesan sampel** di studio.
 
 Di etalase, isi checkout dan klik **Simulasikan pembayaran** pada halaman pesanan. Buka **Operasional** di footer, masukkan kunci admin, lalu ubah status menjadi **Diproduksi → Dikirim → Terkirim**. Saat mengirim, isi nomor resi. Halaman pelacakan menampilkan status dan resi; dashboard kreator menampilkan margin estimasi.
 

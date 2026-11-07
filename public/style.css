@@ -8,3 +8,37 @@ button,.button{display:inline-flex;align-items:center;justify-content:center;min
 label{display:grid;gap:4px;font-weight:650} input,textarea,select{width:100%;min-height:44px;border:1px solid #9aabc8;border-radius:9px;background:white;padding:8px 10px;color:var(--ink);font:inherit} input[type=range]{padding:0;accent-color:var(--blue)} textarea{resize:vertical} small{color:var(--muted)} .variant{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}.form-note:empty{display:none}.form-note{margin:0}.break{overflow-wrap:anywhere}
 .mock{position:relative;min-height:235px;aspect-ratio:1.35;display:grid;place-items:center;background:#e9effc;border-radius:14px;overflow:hidden}.garment{position:relative;width:min(74%,260px);aspect-ratio:1;filter:drop-shadow(0 12px 12px #172c5840)}.garment svg{width:100%;height:100%}.print-zone{position:absolute;left:36%;top:30%;width:28%;height:36%;overflow:hidden}.tote .print-zone{left:29%;top:48%;width:42%;height:36%}.print-zone img{position:absolute;height:auto;aspect-ratio:1;object-fit:contain;transform:translate(-50%,-50%)}.outlined .print-zone{outline:1px dashed #4672d7;outline-offset:2px}.hero .print-zone img{width:95%;left:50%;top:50%}
 @media(max-width:750px){.hero,.columns{grid-template-columns:1fr}.hero .visual{min-height:255px}.hero .mock{min-height:255px;max-height:320px}.header{gap:3px} nav{gap:3px} nav a:not(.button){padding-inline:7px} .hero{min-height:auto} main{padding-top:20px}}
+/* Layout for the storefront, catalog and creator workspace */
+:root{background:#f9faf6;--line:#dce3d9}
+header{background:#f9faf6}
+.hero{background:#e8f3cc;color:#112639;grid-template-columns:1fr 1fr}
+.hero>div:first-child{padding:clamp(28px,5vw,70px)}
+.hero h1{font-size:clamp(2.7rem,6.3vw,5.8rem);max-width:10ch;letter-spacing:-.075em}
+.hero p{color:#364e47;max-width:34ch}
+.hero .eyebrow{color:#275143}
+.hero .visual{background:radial-gradient(ellipse at 38% 23%,#c5e0fd 0%,#8aa9f4 45%,#7590dd 100%);min-height:460px;isolation:isolate}
+.hero .visual:after{content:none}
+.mock-main{position:absolute;inset:3% 16% 2% 0}
+.mock-main .mock{min-height:0;aspect-ratio:auto}
+.mock-inset{position:absolute;width:42%;right:3%;bottom:11%;transform:rotate(13deg)}
+.mock-inset .mock{min-height:0;aspect-ratio:1}
+.mock-inset .garment{transform:none;width:95%}
+.visual-caption{position:absolute;left:18px;bottom:13px;color:#102b66;font-size:.68rem;font-weight:850;letter-spacing:.14em}
+.steps{grid-template-columns:repeat(4,minmax(0,1fr))}
+.steps .number{margin-bottom:20px}
+.catalog-layout{display:grid;grid-template-columns:minmax(180px,245px) minmax(0,1fr);gap:22px;align-items:start}
+.catalog-card{padding:0;overflow:hidden}
+.media-link{display:block}
+.media-link:focus-visible{outline-offset:-4px}
+.catalog-card .mock{margin:0;border-radius:0;min-height:200px}
+.card-content{padding:17px 20px 23px}
+.card-content h3 a{color:var(--ink);text-decoration:none}
+.card-content h3 a:hover{text-decoration:underline}
+.calculator{padding:clamp(24px,5vw,60px);background:#e8f3cc}
+.estimate{font-weight:850;font-size:clamp(2rem,4.5vw,4rem);letter-spacing:-.055em;color:#163c32}
+.studio-nav{border-bottom:1px solid var(--line);margin-bottom:20px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:800px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:750px){.hero,.catalog-layout{grid-template-columns:1fr}.hero .visual{min-height:300px}.hero .mock{max-height:none}.mock-inset{width:34%;right:8%;bottom:9%}}
+@media(max-width:410px){.steps{grid-template-columns:1fr}}
+#preview .print-zone img{cursor:grab;touch-action:none;user-select:none}
