@@ -5,7 +5,7 @@ const docs = new URL('../docs/', import.meta.url);
 mkdirSync(docs, { recursive:true });
 const source = name => new URL('../public/' + name, import.meta.url);
 const target = name => new URL(name, docs);
-for (const name of ['app.js','style.css','voxmerch.png','pages-demo.js','hero-model.png']) cpSync(source(name),target(name));
+for (const name of ['app.js','style.css','voxmerch.png','pages-demo.js','hero-model.png','tote-showcase.png']) cpSync(source(name),target(name));
 const page = readFileSync(source('index.html'),'utf8')
   .replace('<script type="module" src="./app.js"></script>','<script type="module" src="./pages-demo.js"></script>')
   .replace('<main id="main"', '<div class="wrap notice" role="note">Interactive demo. Changes stay in this tab. Payments and fulfillment are simulated.</div>\n  <main id="main"')

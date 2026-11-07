@@ -20,6 +20,7 @@ const adminKey = process.env.VOX_ADMIN_KEY;
 const paymentInstructions = process.env.VOX_PAYMENT_INSTRUCTIONS || '';
 const assets = Object.fromEntries(Object.entries({
   '/':['index.html','text/html; charset=utf-8'], '/app.js':['app.js','text/javascript; charset=utf-8'],
+  '/tote-showcase.png':['tote-showcase.png','image/png'],
   '/hero-model.png':['hero-model.png','image/png'],
   '/style.css':['style.css','text/css; charset=utf-8'], '/voxmerch.png':['voxmerch.png','image/png'],
 }).map(([url,[file,type]]) => [url,[readFileSync(new URL('./public/' + file, import.meta.url)),type]]));

@@ -61,7 +61,7 @@ const steps = [
   ['Publish and sell','Set your price and share your product page.'],
   ['Print and ship','Once an order is paid, follow production and shipping from your dashboard.'],
 ];
-const productCards = items => items.map(base => `<article class="card catalog-card"><a class="media-link" href="#base/${base.id}">${mock(base.id,base.colors[0])}<span class="sr-only">View ${base.name}</span></a><div class="card-content"><span class="eyebrow">${base.id === 'tee' ? 'Apparel' : 'Accessories'}</span><h3><a href="#base/${base.id}">${base.name}</a></h3><p>${base.colors.length} colors · ${base.sizes.length} ${base.sizes.length === 1 ? 'size' : 'sizes'}</p><strong>From ${money(base.cost)}</strong></div></article>`).join('');
+const productCards = (items,showcase=false) => items.map(base => `<article class="card catalog-card"><a class="media-link" href="#base/${base.id}">${showcase && base.id === 'tote' ? '<div class="mock tote-showcase"><img src="./tote-showcase.png" width="1672" height="941" alt="Printed T-shirt and canvas tote with sample artwork" loading="lazy" decoding="async"></div>' : mock(base.id,base.colors[0])}<span class="sr-only">View ${base.name}</span></a><div class="card-content"><span class="eyebrow">${base.id === 'tee' ? 'Apparel' : 'Accessories'}</span><h3><a href="#base/${base.id}">${base.name}</a></h3><p>${base.colors.length} colors · ${base.sizes.length} ${base.sizes.length === 1 ? 'size' : 'sizes'}</p><strong>From ${money(base.cost)}</strong></div></article>`).join('');
 const stepCards = () => `<div class="grid steps">${steps.map(([title,desc],i)=>`<article class="card"><div class="number">0${i+1}</div><h3>${title}</h3><p>${desc}</p></article>`).join('')}</div>`;
 
 function home() {
@@ -79,7 +79,7 @@ function home() {
     <div class="hero-footer"><p>Put your design on products people will wear and carry. Print each one when it sells.</p><div class="actions">${link('catalog','Start designing <span aria-hidden="true">↗</span>')}${link('how','See how it works','secondary')}</div></div>
   </section>
     <section class="section"><div class="eyebrow">From idea to storefront</div><h2>From design to delivery in four steps</h2>${stepCards()}</section>
-    <section class="section"><div class="row"><h2>Find the right blank for your design</h2>${link('catalog','Browse the catalog','secondary')}</div><div class="grid">${productCards(config.catalog)}</div></section>
+    <section class="section"><div class="row"><h2>Find the right blank for your design</h2>${link('catalog','Browse the catalog','secondary')}</div><div class="grid">${productCards(config.catalog,true)}</div></section>
     <section class="section card calculator columns"><div><div class="eyebrow">Margin calculator</div><h2>What could you earn?</h2><p>Estimate your gross margin over 30 days based on your price and daily sales. Shipping, taxes, and fees are excluded.</p><output id="estimate" for="calc-product calc-price calc-sales" class="estimate" aria-live="polite"></output></div><form class="stack" id="calculator"><label>Base product<select id="calc-product">${config.catalog.map(base => `<option value="${base.id}">${base.name}</option>`).join('')}</select></label><label>Retail price (USD)<input id="calc-price" type="number" min="0" max="100000" step="0.01" value="6.50"></label><label>Units sold per day<input id="calc-sales" type="number" min="0" max="10000" value="1"></label></form></section>`;
   const calc = document.querySelector('#calculator');
   const estimate = () => {
