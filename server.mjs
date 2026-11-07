@@ -1,4 +1,4 @@
-import { catalog, shipping } from './catalog.mjs';
+import { catalog, shipping, legacyShipping } from './catalog.mjs';
 import { createServer } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -72,7 +72,7 @@ async function api(req,path,query) {
   const method = req.method;
   const token = req.headers.cookie?.match(/(?:^|; )vox_session=([a-f0-9]+)/)?.[1] || '';
   const owner = one('SELECT owner FROM sessions WHERE token=? AND expires>?',token,Date.now())?.owner;
-  if (method === 'GET' && path === '/api/config') return { catalog, shipping, demo, paymentInstructions, signedIn:!!owner };
+  if (method === 'GET' && path === '/api/config') return { catalog, shipping, legacyShipping, demo, paymentInstructions, signedIn:!!owner };
   if (method === 'POST' && ['/api/register','/api/login'].includes(path)) {
     const input = await body(req);
     const email = str(input.email,254).toLowerCase();
@@ -115,19 +115,26 @@ async function api(req,path,query) {
       const orders = many('SELECT * FROM orders WHERE owner=? ORDER BY rowid DESC',owner).map(unpack);
       return {
         products:many('SELECT * FROM products WHERE owner=? ORDER BY rowid DESC',owner).map(unpack),
-        orders:orders.map(({id,status,title,sample,earnings,tracking,total}) => ({id,status,title,sample,earnings,tracking,total})),
-        earnings:orders.filter(order => order.status === 'Terkirim').reduce((total,order) => total + order.earnings,0),
+        orders:orders.map(({id,status,title,sample,earnings,tracking,total,currency}) => ({id,status,title,sample,earnings,tracking,total,currency})),
+        earnings:orders.filter(order => order.status === 'Terkirim' && order.currency === 'USD').reduce((total,order) => total + order.earnings,0),
+        legacyEarnings:orders.filter(order => order.status === 'Terkirim' && order.currency !== 'USD').reduce((total,order) => total + order.earnings,0),
       };
     }
     if ((method === 'POST' && path === '/api/products') || (method === 'PUT' && productId)) {
       const input = await body(req);
       const base = catalog.find(item => item.id === input.base);
       const name = str(input.name,80);
-      check(base && name && Number.isSafeInteger(input.price) && input.price >= base.cost && input.price <= 10000000,'Check the product name, base product, and price.');
+      const existing = productId && one('SELECT * FROM products WHERE id=? AND owner=?',productId,owner);
+      check(!productId || existing,'Product not found.',404);
+      const previous = existing ? unpack(existing) : null;
+      check(!previous || previous.base === input.base,'The base product cannot be changed.');
+      const currency = previous ? previous.currency || 'IDR' : 'USD';
+      const cost = previous?.cost ?? base?.cost;
+      check(base && name && Number.isSafeInteger(input.price) && input.price >= cost && input.price <= 10000000,'Check the product name, base product, and price.');
       check(base.colors.includes(input.color) && [input.x,input.y,input.scale].every(Number.isFinite) && input.scale >= 20 && input.scale <= 100 && input.x >= input.scale/2 && input.x <= 100-input.scale/2 && input.y >= input.scale/2 && input.y <= 100-input.scale/2,'Check the selected color and artwork position.');
       check(typeof input.preview === 'string' && input.preview.length <= 300000,'The preview image is too large.');
       const data = JSON.stringify({
-        name, base:base.id, cost:base.cost, description:str(input.description,500), price:input.price,
+        name, base:base.id, cost,currency, description:str(input.description,500), price:input.price,
         art:artwork(input.art), preview:artwork(input.preview), color:input.color, x:input.x, y:input.y, scale:input.scale,
       });
       const id = productId || randomUUID();
@@ -150,23 +157,25 @@ async function api(req,path,query) {
     check(base.sizes.includes(input.size) && base.colors.includes(input.color) && Number.isInteger(input.qty) && input.qty >= 1 && input.qty <= 20,'Choose an available size and color, and enter a valid quantity.');
     const id = randomUUID();
     const unit = sample ? product.cost : product.price;
-    const total = unit*input.qty + shipping;
+    const currency = product.currency || 'IDR';
+    const shippingFee = currency === 'USD' ? shipping : legacyShipping;
+    const total = unit*input.qty + shippingFee;
     const data = {
       name,email,address,total,sample, title:product.name, product:product.id,
-      size:input.size,color:input.color,qty:input.qty,shipping,
+      size:input.size,color:input.color,qty:input.qty,shipping:shippingFee,currency,
       artwork:product.art,placement:{x:product.x,y:product.y,scale:product.scale},base:product.base,
       earnings:sample ? 0 : (unit-product.cost)*input.qty, tracking:'',
     };
     run('INSERT INTO orders VALUES (?,?,?,?)',id,row.owner,'Menunggu pembayaran',JSON.stringify(data));
-    return { id,total };
+    return { id,total,currency };
   }
 
   const orderId = path.match(/^\/api\/orders\/([a-f0-9-]+)(?:\/(pay))?$/);
   if (orderId && method === 'GET' && !orderId[2]) {
     const row = one('SELECT * FROM orders WHERE id=?',orderId[1]);
     check(row,'Order not found.',404);
-    const { id,status,title,total,tracking,sample } = unpack(row);
-    return { id,status,title,total,tracking,sample };
+    const { id,status,title,total,tracking,sample,currency } = unpack(row);
+    return { id,status,title,total,tracking,sample,currency };
   }
   if (orderId?.[2] && method === 'POST') {
     check(demo,'Payment simulation is disabled.',403);

@@ -14,7 +14,7 @@ async function demoApi(path,method='GET',data) {
     if (method === 'POST' || method === 'PUT') {
       const key = id || crypto.randomUUID();
       const base = config.catalog.find(item => item.id === data.base);
-      products.set(key,{...data,id:key,cost:base.cost});
+      products.set(key,{...data,id:key,cost:base.cost,currency:'USD'});
       return {id:key};
     }
     const product = products.get(id);
@@ -27,8 +27,8 @@ async function demoApi(path,method='GET',data) {
     if (!product || (!sample && !product.published)) throw new Error('This demo product is unavailable in this tab.');
     const key = crypto.randomUUID();
     const total = (sample ? product.cost : product.price)*data.qty + config.shipping;
-    orders.set(key,{id:key,title:product.name,sample,total,status:'Menunggu pembayaran',earnings:sample ? 0 : (product.price-product.cost)*data.qty});
-    return {id:key,total};
+    orders.set(key,{id:key,title:product.name,sample,total,currency:'USD',status:'Menunggu pembayaran',earnings:sample ? 0 : (product.price-product.cost)*data.qty});
+    return {id:key,total,currency:'USD'};
   }
   if (resource === 'orders') {
     const order = orders.get(id);
