@@ -29,3 +29,11 @@ Di etalase, isi checkout dan klik **Simulasikan pembayaran** pada halaman pesana
 Mockup berupa ilustrasi satu area cetak. Operator mengunduh artwork asli dan meneruskannya ke mitra produksi. Status, resi, serta keputusan penanganan keluhan diperbarui manual. Pembayaran otomatis, pencairan margin, notifikasi, pemulihan akun, tarif kurir real-time, dan integrasi marketplace belum tersedia. Sebelum eksposur publik, tambahkan pembatasan laju untuk autentikasi dan checkout, serta kelola retensi data pesanan.
 
 `npm run check` memeriksa sintaks server dan browser.
+
+## GitHub Pages
+
+Jalankan `npm run build:pages` setelah mengubah antarmuka atau katalog. Commit hasilnya di `docs/`.
+
+Di repo GitHub, pilih **Settings → Pages → Deploy from a branch → main → /docs → Save**. URL proyek: https://voxlumediadesign.github.io/voxmerch/.
+
+Preview Pages menyimulasikan katalog, Product Creator, draf, publikasi di tab, sampel, checkout, dan pembayaran. Data hanya berada di memori tab dan hilang saat halaman dimuat ulang. Demo tidak meminta alamat atau kredensial. Gunakan aplikasi Node.js untuk akun, data persisten, dan antrean produksi.

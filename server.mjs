@@ -1,3 +1,4 @@
+import { catalog, shipping } from './catalog.mjs';
 import { createServer } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -14,11 +15,6 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, owner TEXT, status TEXT, data TEXT);
 `);
 
-const catalog = [
-  { id:'tee', name:'Kaos Essential', detail:'Kaos katun dengan area cetak depan.', cost:69000, sizes:['S','M','L','XL'], colors:['Putih','Hitam'] },
-  { id:'tote', name:'Tote Canvas', detail:'Tas kanvas dengan area cetak satu sisi.', cost:43000, sizes:['Reguler'], colors:['Natural','Hitam'] },
-];
-const shipping = 15000;
 const demo = process.env.VOX_DEMO === '1';
 const adminKey = process.env.VOX_ADMIN_KEY;
 const paymentInstructions = process.env.VOX_PAYMENT_INSTRUCTIONS || '';

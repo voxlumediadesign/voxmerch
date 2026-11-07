@@ -10,7 +10,8 @@ let config;
 let adminKey = '';
 let revision = 0;
 
-async function api(path,method='GET',data,admin=false) {
+let api = serverApi;
+async function serverApi(path,method='GET',data,admin=false) {
   const headers = {};
   if (data) headers['Content-Type'] = 'application/json';
   if (admin) headers.Authorization = 'Bearer ' + adminKey;
@@ -55,7 +56,7 @@ const productCards = items => items.map(base => `<article class="card catalog-ca
 const stepCards = () => `<div class="grid steps">${steps.map(([title,desc],i)=>`<article class="card"><div class="number">0${i+1}</div><h3>${title}</h3><p>${desc}</p></article>`).join('')}</div>`;
 
 function home() {
-  main.innerHTML = `<section class="hero"><div><div class="eyebrow">Studio print-on-demand</div><h1>Buat dan jual merch custom.</h1><p>Mulai dari satu desain. Pilih produknya, tetapkan harga, dan cetak setiap kali pesanan masuk.</p><div class="actions">${link('catalog','Mulai desain <span aria-hidden="true">↗</span>')}${link('how','Cara kerja','secondary')}</div></div><div class="visual"><div class="mock-main">${mock('tee','Putih',{art:'/voxmerch.png',scale:92})}</div><div class="mock-inset">${mock('tote','Natural',{art:'/voxmerch.png',scale:90})}</div><span class="visual-caption">PRATINJAU / KOLEKSI DASAR</span></div></section>
+  main.innerHTML = `<section class="hero"><div><div class="eyebrow">Studio print-on-demand</div><h1>Buat dan jual merch custom.</h1><p>Mulai dari satu desain. Pilih produknya, tetapkan harga, dan cetak setiap kali pesanan masuk.</p><div class="actions">${link('catalog','Mulai desain <span aria-hidden="true">↗</span>')}${link('how','Cara kerja','secondary')}</div></div><div class="visual"><div class="mock-main">${mock('tee','Putih',{art:'./voxmerch.png',scale:92})}</div><div class="mock-inset">${mock('tote','Natural',{art:'./voxmerch.png',scale:90})}</div><span class="visual-caption">PRATINJAU / KOLEKSI DASAR</span></div></section>
     <section class="section"><div class="eyebrow">Dari ide ke etalase</div><h2>Mulai dalam empat langkah</h2>${stepCards()}</section>
     <section class="section"><div class="row"><h2>Temukan produk untuk desainmu</h2>${link('catalog','Lihat katalog','secondary')}</div><div class="grid">${productCards(config.catalog)}</div></section>
     <section class="section card calculator columns"><div><div class="eyebrow">Kalkulator margin</div><h2>Berapa potensi marginmu?</h2><p>Hitung dari harga jual dan biaya dasar. Estimasi 30 hari sebelum ongkir, pajak, dan biaya tambahan.</p><output id="estimate" for="calc-product calc-price calc-sales" class="estimate" aria-live="polite"></output></div><form class="stack" id="calculator"><label>Produk dasar<select id="calc-product">${config.catalog.map(base => `<option value="${base.id}">${base.name}</option>`).join('')}</select></label><label>Harga jual (Rp)<input id="calc-price" type="number" min="0" max="10000000" value="99000"></label><label>Penjualan per hari<input id="calc-sales" type="number" min="0" max="10000" value="1"></label></form></section>`;
@@ -98,9 +99,10 @@ function auth(next) {
   form('auth',async (data,button) => { await api(button?.value || 'login','POST',data); config.signedIn = true; if (location.hash === '#' + next) render(); else location.hash = next; });
 }
 function studio(result,showOrders) {
-  main.innerHTML = intro('Dashboard kreator',showOrders ? 'Pesanan' : 'Produk saya',showOrders ? 'Pantau pesanan penjualan dan sampel.' : 'Kelola draf dan tautan penjualan dari satu tempat.') + `<nav class="studio-nav" aria-label="Dashboard"><a href="#studio" ${showOrders ? '' : 'aria-current="page"'}>Produk saya</a><a href="#merchant-orders" ${showOrders ? 'aria-current="page"' : ''}>Pesanan</a><a href="#catalog">Katalog</a></nav><div class="actions">${link('catalog','Buat produk')}<button id="logout" class="secondary">Keluar</button></div>
+  main.innerHTML = intro('Dashboard kreator',showOrders ? 'Pesanan' : 'Produk saya',showOrders ? 'Pantau pesanan penjualan dan sampel.' : 'Kelola draf dan tautan penjualan dari satu tempat.') + `<nav class="studio-nav" aria-label="Dashboard"><a href="#studio" ${showOrders ? '' : 'aria-current="page"'}>Produk saya</a><a href="#merchant-orders" ${showOrders ? 'aria-current="page"' : ''}>Pesanan</a><a href="#catalog">Katalog</a></nav><div class="actions">${link('catalog','Buat produk')}${config.pages ? '' : '<button id="logout" class="secondary">Keluar</button>'}</div>
     <section class="section" ${showOrders ? 'hidden' : ''}><h2>Produk</h2><div class="grid">${result.products.map(product => `<article class="card">${mock(product.base,product.color,product)}<span class="chip">${product.published ? 'Terbit' : 'Draf'}</span><h3>${esc(product.name)}</h3><p>${rp(product.price)}</p><div class="actions">${link('edit/' + product.id,'Edit','secondary')}${link('sample/' + product.id,'Pesan sampel','secondary')}${product.published ? link('p/' + product.id,'Buka etalase','secondary') : ''}</div></article>`).join('') || '<p>Produk yang Anda simpan akan muncul di sini.</p>'}</div></section>
     <section class="section" ${showOrders ? '' : 'hidden'}><h2>Pesanan</h2><p>Estimasi margin pesanan terkirim <strong>${rp(result.earnings)}</strong></p><div class="card stack">${result.orders.map(order=>`<div class="row"><div><strong>${esc(order.title)}</strong> ${order.sample ? '(sampel)' : ''}<br><small>${esc(order.status)} · ${rp(order.total)} · Margin ${rp(order.earnings)}</small></div>${link('order/' + order.id,'Detail','secondary')}</div>`).join('') || '<p>Belum ada pesanan.</p>'}</div></section>`;
+  if (config.pages) return;
   document.getElementById('logout').onclick = async () => { await api('logout','POST'); config.signedIn = false; location.hash = 'home'; };
 }
 
@@ -211,11 +213,11 @@ function shop(products) {
 function checkout(product,sample) {
   const base = config.catalog.find(item => item.id === product.base);
   const unit = sample ? product.cost : product.price;
-  main.innerHTML = intro(sample ? 'Pesan sampel' : 'Etalase Voxmerch',esc(product.name),esc(product.description || base.detail)) + `<div class="columns"><section class="card"><div id="product-preview"></div><div class="row"><strong class="price">${rp(unit)}</strong>${sample ? '<span class="chip">Harga sampel</span>' : '<button id="copy" class="secondary">Salin tautan</button>'}</div><p id="copy-state" role="status"></p></section>
+  main.innerHTML = intro(sample ? 'Pesan sampel' : 'Etalase Voxmerch',esc(product.name),esc(product.description || base.detail)) + `<div class="columns"><section class="card"><div id="product-preview"></div><div class="row"><strong class="price">${rp(unit)}</strong>${sample ? '<span class="chip">Harga sampel</span>' : config.pages ? '' : '<button id="copy" class="secondary">Salin tautan</button>'}</div><p id="copy-state" role="status"></p></section>
   <form id="checkout" class="card stack"><h2>Pengiriman</h2><div class="variant"><label>Ukuran<select name="size">${options(base.sizes)}</select></label><label>Warna<select name="color">${options(base.colors,product.color)}</select></label>${field('Jumlah','qty','type="number" min="1" max="20" required',1)}</div>
-  ${field('Nama penerima','name','required maxlength="100" autocomplete="name"')}
+  ${config.pages ? '<p>Alamat contoh digunakan untuk simulasi.</p>' : `${field('Nama penerima','name','required maxlength="100" autocomplete="name"')}
   ${field('Email','email','type="email" required maxlength="254" autocomplete="email"')}
-  <label>Alamat lengkap<textarea name="address" required minlength="10" maxlength="500" rows="3" autocomplete="street-address"></textarea></label>
+  <label>Alamat lengkap<textarea name="address" required minlength="10" maxlength="500" rows="3" autocomplete="street-address"></textarea></label>`}
   <div class="row"><span>Ongkir pilot</span><span>${rp(config.shipping)}</span></div>
   <div class="row"><strong>Total</strong><strong id="total"></strong></div>
   <p>${config.demo ? 'Mode demo · pembayaran dapat disimulasikan.' : 'Pembayaran diverifikasi secara manual oleh operator Voxmerch.'}</p>
@@ -229,7 +231,7 @@ function checkout(product,sample) {
   fields.color.onchange = preview;
   fields.qty.oninput = preview;
   preview();
-  if (!sample) document.getElementById('copy').onclick = async () => {
+  if (!sample && !config.pages) document.getElementById('copy').onclick = async () => {
     const state = document.getElementById('copy-state');
     try { await navigator.clipboard.writeText(location.href); state.textContent = 'Tautan disalin.'; }
     catch { state.textContent = 'Salin alamat dari bilah alamat browser.'; }
@@ -322,5 +324,10 @@ async function render() {
     if (current()) main.innerHTML = intro('Voxmerch','Halaman tidak dapat dibuka',esc(error.message)) + link('home','Ke beranda');
   }
 }
-window.addEventListener('hashchange',() => { if (location.hash !== '#main') { render(); main.focus(); } });
-render();
+export function start(adapter = serverApi) {
+  api = adapter;
+  window.addEventListener('hashchange',() => { if (location.hash !== '#main') { render(); main.focus(); } });
+  render();
+}
+
+if (document.querySelector('script[src="./app.js"]')) start();
