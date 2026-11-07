@@ -61,7 +61,20 @@ const steps = [
   ['Publish and sell','Set your price and share your product page.'],
   ['Print and ship','Once an order is paid, follow production and shipping from your dashboard.'],
 ];
-const productCards = (items,showcase=false) => items.map(base => `<article class="card catalog-card"><a class="media-link" href="#base/${base.id}">${showcase && base.id === 'tote' ? '<div class="mock tote-showcase"><img src="./tote-showcase.png" width="1672" height="941" alt="Printed T-shirt and canvas tote with sample artwork" loading="lazy" decoding="async"></div>' : mock(base.id,base.colors[0])}<span class="sr-only">View ${base.name}</span></a><div class="card-content"><span class="eyebrow">${base.id === 'tee' ? 'Apparel' : 'Accessories'}</span><h3><a href="#base/${base.id}">${base.name}</a></h3><p>${base.colors.length} colors · ${base.sizes.length} ${base.sizes.length === 1 ? 'size' : 'sizes'}</p><strong>From ${money(base.cost)}</strong></div></article>`).join('');
+// The source has both products. Mask along the gap between them and frame each separately.
+function productShowcase(base) {
+  const shirt = base.id === 'tee';
+  const bounds = shirt ? '100 0 930 941' : '900 85 625 856';
+  const outline = shirt
+    ? '0,0 1020,0 1020,380 920,540 900,941 0,941'
+    : '1020,0 1672,0 1672,941 900,941 920,540 1020,380';
+  const mask = 'showcase-' + base.id;
+  return `<div class="mock product-showcase"><svg viewBox="${bounds}" aria-hidden="true">
+    <defs><clipPath id="${mask}"><polygon points="${outline}"/></clipPath></defs>
+    <image href="./tote-showcase.png" width="1672" height="941" clip-path="url(#${mask})"/>
+  </svg></div>`;
+}
+const productCards = (items,showcase=false) => items.map(base => `<article class="card catalog-card"><a class="media-link" href="#base/${base.id}">${showcase ? productShowcase(base) : mock(base.id,base.colors[0])}<span class="sr-only">View ${base.name}</span></a><div class="card-content"><span class="eyebrow">${base.id === 'tee' ? 'Apparel' : 'Accessories'}</span><h3><a href="#base/${base.id}">${base.name}</a></h3><p>${base.colors.length} colors · ${base.sizes.length} ${base.sizes.length === 1 ? 'size' : 'sizes'}</p><strong>From ${money(base.cost)}</strong></div></article>`).join('');
 const stepCards = () => `<div class="grid steps">${steps.map(([title,desc],i)=>`<article class="card"><div class="number">0${i+1}</div><h3>${title}</h3><p>${desc}</p></article>`).join('')}</div>`;
 
 function home() {

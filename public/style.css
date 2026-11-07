@@ -63,13 +63,13 @@ button:hover, .button:hover { background: #315de5; }
   height: clamp(395px, 49vw, 600px);
   overflow: hidden;
 }
-.hero-stage, .catalog-card .tote-showcase {
+.hero-stage, .catalog-card .product-showcase {
   background:
     linear-gradient(#bad4ff0e 1px, transparent 1px) center / 48px 48px,
     linear-gradient(90deg, #bad4ff0e 1px, transparent 1px) center / 48px 48px,
     radial-gradient(ellipse at 48% 55%, #244995, #102650 68%, #0a1834);
 }
-.tote-showcase img { width: 100%; padding: 4%; }
+.product-showcase svg { position: absolute; inset: 7% 10%; width: 80%; height: 86%; }
 .hero-kicker {
   position: absolute;
   z-index: 3;
