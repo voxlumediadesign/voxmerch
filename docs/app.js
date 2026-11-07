@@ -19,7 +19,22 @@ let config;
 let adminKey = '';
 let revision = 0;
 let disposeHero;
+let entranceObserver;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+function observeCardEntrances() {
+  if (reducedMotion.matches || !('IntersectionObserver' in window)) return;
+  entranceObserver = new IntersectionObserver((entries, observer) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add('card-enter');
+      observer.unobserve(entry.target);
+    }
+  }, { threshold: 0.12 });
+  for (const card of main.querySelectorAll('.steps .card, .catalog-card, .calculator')) {
+    entranceObserver.observe(card);
+  }
+}
 
 async function syncHeroMotion() {
   disposeHero?.();
@@ -345,6 +360,7 @@ async function render() {
   }
   disposeHero?.();
   disposeHero = undefined;
+  entranceObserver?.disconnect();
   main.innerHTML = '<p role="status">Loading…</p>';
   try {
     config = await api('config');
@@ -381,6 +397,8 @@ async function render() {
     } else throw new Error('Page not found.');
   } catch(error) {
     if (current()) main.innerHTML = intro('Voxmerch','We couldn’t open this page',esc(error.message)) + link('home','Back to home');
+  } finally {
+    if (current()) observeCardEntrances();
   }
 }
 export function start(adapter = serverApi) {

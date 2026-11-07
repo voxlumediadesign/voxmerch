@@ -42,5 +42,5 @@ async function demoApi(path,method='GET',data) {
   throw new Error('This feature is available in the full Voxmerch app.');
 }
 
-const { start } = await import('./app.js');
+const { start } = await import('./app.js?v=13dfbf8f1e0e');
 start(demoApi);
