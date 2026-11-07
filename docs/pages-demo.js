@@ -19,12 +19,12 @@ async function demoApi(path,method='GET',data) {
     }
     const product = products.get(id);
     if (product && (product.published || query === 'edit=1')) return product;
-    throw new Error('Produk demo tidak tersedia di tab ini.');
+    throw new Error('This demo product is unavailable in this tab.');
   }
   if (method === 'POST' && (route === 'orders' || route === 'sample')) {
     const product = products.get(data.product);
     const sample = route === 'sample';
-    if (!product || (!sample && !product.published)) throw new Error('Produk demo tidak tersedia di tab ini.');
+    if (!product || (!sample && !product.published)) throw new Error('This demo product is unavailable in this tab.');
     const key = crypto.randomUUID();
     const total = (sample ? product.cost : product.price)*data.qty + config.shipping;
     orders.set(key,{id:key,title:product.name,sample,total,status:'Menunggu pembayaran',earnings:sample ? 0 : (product.price-product.cost)*data.qty});
@@ -32,14 +32,14 @@ async function demoApi(path,method='GET',data) {
   }
   if (resource === 'orders') {
     const order = orders.get(id);
-    if (!order) throw new Error('Pesanan demo tidak tersedia di tab ini.');
+    if (!order) throw new Error('This demo order is unavailable in this tab.');
     if (action === 'pay' && method === 'POST') {
       order.status = 'Dibayar';
       return {ok:true};
     }
     return order;
   }
-  throw new Error('Fitur ini tersedia pada aplikasi Voxmerch dengan server.');
+  throw new Error('This feature is available in the full Voxmerch app.');
 }
 
 const { start } = await import('./app.js');
