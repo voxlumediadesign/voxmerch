@@ -63,13 +63,23 @@ button:hover, .button:hover { background: #315de5; }
   height: clamp(395px, 49vw, 600px);
   overflow: hidden;
 }
-.hero-stage, .catalog-card .product-showcase {
+.hero-stage {
   background:
     linear-gradient(#bad4ff0e 1px, transparent 1px) center / 48px 48px,
     linear-gradient(90deg, #bad4ff0e 1px, transparent 1px) center / 48px 48px,
     radial-gradient(ellipse at 48% 55%, #244995, #102650 68%, #0a1834);
 }
-.product-showcase svg { position: absolute; inset: 7% 10%; width: 80%; height: 86%; }
+.product-showcase {
+  background: #1055bd;
+}
+.product-showcase svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(1.27);
+}
+.product-showcase--tote svg { transform: scale(1.38); }
 .hero-kicker {
   position: absolute;
   z-index: 3;

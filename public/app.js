@@ -69,12 +69,12 @@ function productShowcase(base) {
     ? '0,0 1020,0 1020,380 920,540 900,941 0,941'
     : '1020,0 1672,0 1672,941 900,941 920,540 1020,380';
   const mask = 'showcase-' + base.id;
-  return `<div class="mock product-showcase"><svg viewBox="${bounds}" aria-hidden="true">
+  return `<div class="mock product-showcase product-showcase--${base.id}"><svg viewBox="${bounds}" role="img" aria-label="${shirt ? 'Printed white T-shirt' : 'Printed natural canvas tote'}">
     <defs><clipPath id="${mask}"><polygon points="${outline}"/></clipPath></defs>
     <image href="./tote-showcase.png" width="1672" height="941" clip-path="url(#${mask})"/>
   </svg></div>`;
 }
-const productCards = (items,showcase=false) => items.map(base => `<article class="card catalog-card"><a class="media-link" href="#base/${base.id}">${showcase ? productShowcase(base) : mock(base.id,base.colors[0])}<span class="sr-only">View ${base.name}</span></a><div class="card-content"><span class="eyebrow">${base.id === 'tee' ? 'Apparel' : 'Accessories'}</span><h3><a href="#base/${base.id}">${base.name}</a></h3><p>${base.colors.length} colors · ${base.sizes.length} ${base.sizes.length === 1 ? 'size' : 'sizes'}</p><strong>From ${money(base.cost)}</strong></div></article>`).join('');
+const productCards = items => items.map(base => `<article class="card catalog-card"><a class="media-link" href="#base/${base.id}">${productShowcase(base)}<span class="sr-only">View ${base.name}</span></a><div class="card-content"><span class="eyebrow">${base.id === 'tee' ? 'Apparel' : 'Accessories'}</span><h3><a href="#base/${base.id}">${base.name}</a></h3><p>${base.colors.length} colors · ${base.sizes.length} ${base.sizes.length === 1 ? 'size' : 'sizes'}</p><strong>From ${money(base.cost)}</strong></div></article>`).join('');
 const stepCards = () => `<div class="grid steps">${steps.map(([title,desc],i)=>`<article class="card"><div class="number">0${i+1}</div><h3>${title}</h3><p>${desc}</p></article>`).join('')}</div>`;
 
 function home() {
@@ -92,7 +92,7 @@ function home() {
     <div class="hero-footer"><p>Put your design on products people will wear and carry. Print each one when it sells.</p><div class="actions">${link('catalog','Start designing <span aria-hidden="true">↗</span>')}${link('how','See how it works','secondary')}</div></div>
   </section>
     <section class="section"><div class="eyebrow">From idea to storefront</div><h2>From design to delivery in four steps</h2>${stepCards()}</section>
-    <section class="section"><div class="row"><h2>Find the right blank for your design</h2>${link('catalog','Browse the catalog','secondary')}</div><div class="grid">${productCards(config.catalog,true)}</div></section>
+    <section class="section"><div class="row"><h2>Find the right blank for your design</h2>${link('catalog','Browse the catalog','secondary')}</div><div class="grid">${productCards(config.catalog)}</div></section>
     <section class="section card calculator columns"><div><div class="eyebrow">Margin calculator</div><h2>What could you earn?</h2><p>Estimate your gross margin over 30 days based on your price and daily sales. Shipping, taxes, and fees are excluded.</p><output id="estimate" for="calc-product calc-price calc-sales" class="estimate" aria-live="polite"></output></div><form class="stack" id="calculator"><label>Base product<select id="calc-product">${config.catalog.map(base => `<option value="${base.id}">${base.name}</option>`).join('')}</select></label><label>Retail price (USD)<input id="calc-price" type="number" min="0" max="100000" step="0.01" value="6.50"></label><label>Units sold per day<input id="calc-sales" type="number" min="0" max="10000" value="1"></label></form></section>`;
   const calc = document.querySelector('#calculator');
   const estimate = () => {
@@ -123,9 +123,11 @@ function catalog() {
   filter();
 }
 function baseDetails(base) {
-  main.innerHTML = `<p><a href="#catalog">← Back to catalog</a></p>` + intro('Base product',base.name,base.detail) + `<div class="columns"><div id="base-preview">${mock(base.id,base.colors[0],{},true)}</div><section class="card stack"><h2>Product specifications</h2><div class="row"><span>Base cost</span><strong>${money(base.cost)}</strong></div><div class="row"><span>Size</span><strong>${base.sizes.map(label).join(', ')}</strong></div><div class="row"><span>Print area</span><strong>${base.id === 'tee' ? 'Front' : 'One side'}</strong></div><label>Preview color<select id="base-color">${options(base.colors)}</select></label><div class="actions">${link('edit/' + base.id,'Start designing')}</div></section></div>`;
+  main.innerHTML = `<p><a href="#catalog">← Back to catalog</a></p>` + intro('Base product',base.name,base.detail) + `<div class="columns"><div id="base-preview">${productShowcase(base)}</div><section class="card stack"><h2>Product specifications</h2><div class="row"><span>Base cost</span><strong>${money(base.cost)}</strong></div><div class="row"><span>Size</span><strong>${base.sizes.map(label).join(', ')}</strong></div><div class="row"><span>Print area</span><strong>${base.id === 'tee' ? 'Front' : 'One side'}</strong></div><label>Preview color<select id="base-color">${options(base.colors)}</select></label><div class="actions">${link('edit/' + base.id,'Start designing')}</div></section></div>`;
   document.querySelector('#base-color').onchange = event => {
-    document.querySelector('#base-preview').innerHTML = mock(base.id,event.target.value,{},true);
+    document.querySelector('#base-preview').innerHTML = event.target.value === base.colors[0]
+      ? productShowcase(base)
+      : mock(base.id,event.target.value,{},true);
   };
 }
 function auth(next) {
