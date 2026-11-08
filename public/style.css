@@ -80,7 +80,7 @@ button:hover, .button:hover { background: var(--action-hover); border-color: var
   position: relative;
   isolation: isolate;
   container-type: inline-size;
-  height: clamp(395px, 49vw, 600px);
+  height: clamp(360px, 43vw, 465px);
   overflow: hidden;
 }
 .hero-stage {
@@ -163,7 +163,7 @@ button:hover, .button:hover { background: var(--action-hover); border-color: var
 .hero-footer p { margin: 0; max-width: 46ch; }
 .hero-footer .button { gap: .55em; }
 @media (max-width: 650px) {
-  .hero-stage { height: clamp(355px, 106vw, 470px); }
+  .hero-stage { height: clamp(285px, 82vw, 390px); }
   .hero-kicker { top: 15px; }
   .hero-title { font-size: clamp(2rem, 13cqw, 5rem); }
   .hero-model { height: 78%; }
@@ -224,4 +224,16 @@ button:hover, .button:hover { background: var(--action-hover); border-color: var
 @keyframes ambient-drift {
   from { transform: translate3d(-5%, -3%, 0); opacity: .64; }
   to { transform: translate3d(6%, 5%, 0); opacity: 1; }
+}
+
+.editor-preview { display: grid; gap: 16px; min-width: 0; }
+.editor-preview #preview .mock { margin-bottom: 0; background: #779bd4; }
+.editor-preview > p { margin: 0; }
+.empty-state { grid-column: 1 / -1; }
+main > .notice { margin: 0 0 18px; }
+@media (max-width: 650px) {
+  .header { padding-block: 8px; }
+
+  .hero-footer { gap: 9px; }
+  .hero-footer p { font-size: .9rem; }
 }

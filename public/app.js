@@ -20,6 +20,7 @@ let adminKey = '';
 let revision = 0;
 let disposeHero;
 let entranceObserver;
+let successMessage;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 function observeCardEntrances() {
@@ -166,8 +167,8 @@ function auth(next) {
   form('auth',async (data,button) => { await api(button?.value || 'login','POST',data); config.signedIn = true; if (location.hash === '#' + next) render(); else location.hash = next; });
 }
 function studio(result,showOrders) {
-  main.innerHTML = intro('Creator dashboard',showOrders ? 'Orders' : 'My products',showOrders ? 'Track customer orders and samples.' : 'Manage drafts and published products.') + `<nav class="studio-nav" aria-label="Dashboard"><a href="#studio" ${showOrders ? '' : 'aria-current="page"'}>My products</a><a href="#merchant-orders" ${showOrders ? 'aria-current="page"' : ''}>Orders</a><a href="#catalog">Catalog</a></nav><div class="actions">${link('catalog','Create a product')}${config.pages ? '' : '<button id="logout" class="secondary">Sign out</button>'}</div>
-    <section class="section" ${showOrders ? 'hidden' : ''}><h2>Products</h2><div class="grid">${result.products.map(product => `<article class="card">${mock(product.base,product.color,product)}<span class="chip">${product.published ? 'Published' : 'Draft'}</span><h3>${esc(product.name)}</h3><p>${money(product.price,recordCurrency(product))}</p><div class="actions">${link('edit/' + product.id,'Edit','secondary')}${link('sample/' + product.id,'Order a sample','secondary')}${product.published ? link('p/' + product.id,'View listing','secondary') : ''}</div></article>`).join('') || '<p>Your saved products will appear here.</p>'}</div></section>
+  main.innerHTML = intro('Creator dashboard',showOrders ? 'Orders' : 'My products',showOrders ? 'Track customer orders and samples.' : 'Manage drafts and published products.') + `<nav class="studio-nav" aria-label="Dashboard"><a href="#studio" ${showOrders ? '' : 'aria-current="page"'}>My products</a><a href="#merchant-orders" ${showOrders ? 'aria-current="page"' : ''}>Orders</a><a href="#catalog">Catalog</a></nav><div class="actions">${!showOrders && result.products.length ? link('catalog','Create a product') : ''}${config.pages ? '' : '<button id="logout" class="secondary">Sign out</button>'}</div>
+    <section class="section" ${showOrders ? 'hidden' : ''}><div class="grid">${result.products.map(product => `<article class="card">${mock(product.base,product.color,product)}<span class="chip">${product.published ? 'Published' : 'Draft'}</span><h3>${esc(product.name)}</h3><p>${money(product.price,recordCurrency(product))}</p><div class="actions">${link('edit/' + product.id,'Edit','secondary')}${link('sample/' + product.id,'Order a sample','secondary')}${product.published ? link('p/' + product.id,'View listing','secondary') : ''}</div></article>`).join('') || `<div class="card empty-state"><h2>Create your first product</h2><p>Choose a blank, then add your artwork or try a sample in Product Creator.</p>${link('catalog','Choose a product')}</div>`}</div></section>
     <section class="section" ${showOrders ? '' : 'hidden'}><h2>Orders</h2><p>Estimated margin on delivered orders <strong>${money(result.earnings)}</strong>${result.legacyEarnings ? ` · <strong>${money(result.legacyEarnings,'IDR')}</strong>` : ''}</p><div class="card stack">${result.orders.map(order=>`<div class="row"><div><strong>${esc(order.title)}</strong> ${order.sample ? '(sample)' : ''}<br><small>${esc(label(order.status))} · ${money(order.total,recordCurrency(order))} · Margin ${money(order.earnings,recordCurrency(order))}</small></div>${link('order/' + order.id,'View order','secondary')}</div>`).join('') || '<p>No orders yet.</p>'}</div></section>`;
   if (config.pages) return;
   document.getElementById('logout').onclick = async () => { await api('logout','POST'); config.signedIn = false; location.hash = 'home'; };
@@ -180,16 +181,20 @@ function editor(base,product) {
   const units = currency === 'USD' ? 100 : 1;
   let art = initial.art || '';
   let artworkPreview = initial.preview || '';
-  main.innerHTML = intro('Product Creator',base.name,'Upload your artwork and place it in the print area. Save a draft or publish when you are ready.') + `<div class="columns"><section class="card"><div id="preview"></div><p>Drag your artwork inside the outlined print area or use the position sliders. This mockup is illustrative.</p></section><form id="editor" class="card stack">
+  main.innerHTML = intro('Product Creator',base.name,'Upload your artwork and place it in the print area. Save a draft or publish when you are ready.') + `<div class="columns"><section class="card editor-preview"><div class="artwork-controls stack">
+    <label>Upload artwork <small>PNG or JPG up to 2 MB</small><input form="editor" name="art" type="file" accept="image/png,image/jpeg"></label>
+    <div class="actions"><button type="button" class="secondary" id="sample-artwork">Try sample artwork</button></div>
+    <p id="file-state" class="form-note" role="status">${art ? 'Artwork ready.' : ''}</p>
+  </div><div id="preview"></div><p>Drag your artwork inside the outlined print area or use the position sliders. This mockup is illustrative.</p></section><form id="editor" class="card stack">
   ${field('Product name','name','required maxlength="80"',initial.name)}
   <label>Description<textarea name="description" maxlength="500" rows="3">${esc(initial.description)}</textarea></label>
   <label>Preview color<select name="color">${options(base.colors,initial.color)}</select></label>
-  <label>Artwork (PNG or JPG, up to 2 MB)<input name="art" type="file" accept="image/png,image/jpeg"></label><p id="file-state" aria-live="polite">${art ? 'Artwork saved.' : ''}</p>
   ${field('Design size','scale','type="range" min="20" max="100"',initial.scale)}
   ${field('Horizontal position','x','type="range"',initial.x)}
   ${field('Vertical position','y','type="range"',initial.y)}
   ${field('Retail price (' + currency + ')','price',`type="number" min="${cost/units}" max="${10000000/units}" step="${1/units}" required`,initial.price/units)}
   <p>Base cost ${money(cost,currency)} · Estimated margin <strong id="margin"></strong></p>
+  ${config.pages ? '<small>Demo drafts stay in this tab after refresh. Payments and fulfillment are simulated.</small>' : ''}
   <div class="actions"><button class="secondary" value="draft">Save draft</button><button value="publish">Publish</button></div>${errorNote}</form></div>`;
   const editorForm = document.getElementById('editor');
   const fields = editorForm.elements;
@@ -223,9 +228,7 @@ function editor(base,product) {
   });
   surface.addEventListener('lostpointercapture',() => { drag = undefined; });
   let pending;
-  fields.art.addEventListener('change',() => {
-    const file = fields.art.files[0];
-    if (!file) return;
+  function loadArtwork(file, sample = false) {
     const state = document.getElementById('file-state');
     const upload = (async () => {
       await Promise.resolve();
@@ -254,6 +257,7 @@ function editor(base,product) {
           artworkPreview = canvas.toDataURL('image/png');
         }
         art = url;
+        if (sample && !fields.name.value.trim()) fields.name.value = base.name + ' Sample';
         state.textContent = `${image.naturalWidth} × ${image.naturalHeight} px · Order a sample to check print quality.`;
         preview();
       } catch(error) {
@@ -264,7 +268,30 @@ function editor(base,product) {
       }
     })();
     pending = upload;
+    return upload;
+  }
+  fields.art.addEventListener('change', () => {
+    if (fields.art.files[0]) loadArtwork(fields.art.files[0]);
   });
+  document.getElementById('sample-artwork').onclick = async event => {
+    const button = event.currentTarget;
+    const state = document.getElementById('file-state');
+    button.disabled = true;
+    const previousUpload = pending;
+    try {
+      const response = await fetch('./voxmerch.png');
+      if (!response.ok) throw new Error('Sample unavailable.');
+      const file = await response.blob();
+      if (previousUpload === pending && editorForm.isConnected) {
+        fields.art.value = '';
+        await loadArtwork(file, true);
+      }
+    } catch {
+      if (previousUpload === pending) state.textContent = 'Could not load the sample. Try again or upload your own artwork.';
+    } finally {
+      button.disabled = false;
+    }
+  };
   preview();
   form('editor',async (values,button) => {
     await pending;
@@ -273,6 +300,7 @@ function editor(base,product) {
     const saved = await api(product ? 'products/' + product.id : 'products',product ? 'PUT' : 'POST',{
       base:base.id,name:values.name,description:values.description,color:values.color,price:Math.round(Number(values.price)*units),art,preview:artworkPreview,...placement(),published,
     });
+    successMessage = published ? 'Product published.' : 'Draft saved.';
     location.hash = published ? 'p/' + saved.id : 'studio';
   });
 }
@@ -398,7 +426,17 @@ async function render() {
   } catch(error) {
     if (current()) main.innerHTML = intro('Voxmerch','We couldn’t open this page',esc(error.message)) + link('home','Back to home');
   } finally {
-    if (current()) observeCardEntrances();
+    if (current()) {
+      if (successMessage) {
+        const message = document.createElement('p');
+        message.className = 'notice';
+        message.setAttribute('role','status');
+        message.textContent = successMessage;
+        main.prepend(message);
+        successMessage = undefined;
+      }
+      observeCardEntrances();
+    }
   }
 }
 export function start(adapter = serverApi) {

@@ -19,7 +19,7 @@ writeFileSync(target('pages-demo.js'), demo);
 const page = readFileSync(source('index.html'),'utf8')
   .replace('./style.css', `./style.css?v=${version}`)
   .replace('./app.js', `./pages-demo.js?v=${version}`)
-  .replace('<main id="main"', '<div class="wrap notice" role="note">Interactive demo. Changes stay in this tab. Payments and fulfillment are simulated.</div>\n  <main id="main"')
+  .replace('<span>Voxmerch · Print on demand</span>', '<span>Voxmerch · Interactive demo</span>')
   .replace('<a href="#admin">Operations</a>', '');
 writeFileSync(target('index.html'),page);
 writeFileSync(target('demo-config.js'),'export default ' + JSON.stringify({catalog,shipping,demo:true,pages:true,signedIn:true}) + ';\n');
